@@ -1,13 +1,26 @@
 <?php
+    // Get current directory
+    if (isset($_GET["currentDir"])) {
+        $currentDir = htmlspecialchars($_GET["currentDir"]);
+        $isRoot = false; 
+    }
+    
+    else {
+        $currentDir = null;
+        $isRoot = true; 
+    }
+
+    echo "<p>Current directory is " . $currentDir . "</p>"; 
+
     // Get all files for current directory
-    $allFiles = scandir(getcwd()); 
+    $allFiles = scandir(getcwd() . DIRECTORY_SEPARATOR . $currentDir); 
     
     // Remove current, parent directory pointers
-    $allFiles = array_diff($allFiles, array('.', '..')); 
+    $allFiles = array_diff($allFiles, array('.', '..', '.git')); 
 
     // Filter only the directories
     $directories = array_filter($allFiles, function($item) {
-        $name = getcwd() . $item; 
+        $name = $item; 
         echo $name . "<br>";
         return is_dir($item);
     }); 
