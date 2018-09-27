@@ -1,7 +1,7 @@
 <?php
 	function longest_common_substring($words)
 	{
-		$words = array_map('strtolower', array_map('trim', $words));
+		// $words = array_map('strtolower', array_map('trim', $words));
 		$sort_by_strlen = create_function('$a, $b', 'if (strlen($a) == strlen($b)) { return strcmp($a, $b); } return (strlen($a) < strlen($b)) ? -1 : 1;');
 		usort($words, $sort_by_strlen);
 
@@ -38,7 +38,7 @@
 
 	// Get current directory
 	if (isset($_GET["currentDir"])) {
-		$currentDir = htmlspecialchars($_GET["currentDir"]);
+		$currentDir = htmlspecialchars_decode(urldecode($_GET["currentDir"]));
 		$isRoot = false; 
 	}
 	
@@ -69,46 +69,129 @@
 
 	// Get jpg & png images, ignore cases for extension
 	$allImageFiles = preg_grep("/^.*\.(jpe?g|png)$/i", $allFiles);
+	$numImageFiles = count($allImageFiles); 
 
 	// Prefix
 	$slideNamePrefix = longest_common_substring($allImageFiles); 
+
+	natsort($allImageFiles);
 ?>
 <!doctype html>
 <html>
 	<head>
 		<title>Slide Viewer</title>
 
-		<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap-grid.min.css" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
 
 		<style>
 		body {
 			font-family: 'Roboto', sans-serif;
 			position: relative; 
+			margin: 0; 
+			padding: 0; 
+			font-size: 14px; 
+			line-height: 24px; 
 		}
+
+		h1 {
+			font-size: 14px; 
+			line-height: 24px; 
+			font-weight: normal; 
+			margin-top: 20px; 
+		}
+
+		ul, li, h1, div {
+			margin: 0; 
+			padding: 0; 
+		}
+
+		ul {
+			list-style-type: none; 
+		}
+
+			ul li a {
+				display: block; 
+			}
+
+		a {
+			color: black; 
+			text-decoration: none; 
+		}
+
+			a:hover {
+				color: #ff5544; 
+			}
+
+			li.current a {
+				font-weight: bold; 
+			}
+
+				li.current a:hover {
+					color: black; 
+				}
 
 		#sidebar {
 			width: 250px; 
 			position: fixed;
 			top: 0; 
-			left: 0;
+			left: 0; 
+			box-sizing: border-box; 
+			padding: 20px 10px 20px 25px; 
+			overflow: hidden; 
 		}
+
+			#sidebar li {
+				display: block; 
+			}
 
 		#content {
 			padding-left: 250px; 
 			box-sizing: border-box; 
-		}	
-			#root-display {
-				color: white; 
-				background: black; 
-				padding: 200px 60px; 
-				text-align: center; 
+			padding-right: 40px; 
+		}
+
+			#content ul#list-main {
+				font-size: 24px; 
+				line-height: 34px; 
+				font-weight: 700; 
+			}
+
+				#content ul#list-main li {
+					display: block; 
+				}
+
+				#content ul#list-main li a {
+					display: block; 
+					color: #ccc; 
+					background: #f5f5f5; 
+					border: 1px solid #e5e5e5; 
+					border-top: none; 
+					padding: 40px 50px;
+				}
+
+					#content ul#list-main li a:hover {
+						color: black; 
+						border-color: #ddd;
+						background: #eee; 
+					}
+
+			#content h1 {
+				margin-top: 20px; 
+				margin-bottom: 15px; 
+			}
+
+			#content h1 .separator {
+				color: #ff5544; 
+			}
+
+			#content h1 .count {
+				color: #999; 
 			}
 
 			#content img {
 				max-width: 100%; 
 				border: 1px solid #ddd; 
-				margin-bottom: 50px; 
+				margin-bottom: 80px; 
 			}
 
 		</style>
@@ -118,34 +201,29 @@
 		<div id="sidebar">
 			<nav>
 				<ul>
+					<li><a id="link-home" href="./">Home</a></li>
+
 					<?php foreach ($directories as $dir) { ?>
-						<li><a href="?currentDir=<?php echo $dir; ?>"><?php echo $dir; ?></a></li>
+						<li<?php if ($dir == $currentDir) echo ' class="current"'; ?>><a href="?currentDir=<?php echo urlencode(htmlspecialchars($dir)); ?>"><?php echo $dir; ?></a></li>
 					<?php } ?>
 				</ul>
 			</nav>
 		</div>
 
 		<div id="content">
-			<?php 
-				echo "<p>Current directory is " . $currentDir . "</p>"; 
-				echo "<p>Slide prefix is " . $slideNamePrefix . "</p>"; 
-
-				echo "<h1>Folders</h1>";
-				print_r($directories); 
-				echo "<br>"; 
-
-				echo "<h1>Images</h1>";
-				print_r($allImageFiles); 
-				echo "<br>";
-
-			?>
-
 			<?php if ($isRoot) { ?>
-				<div id="root-display">
-					<p>Please select a slide from the left menu</p>
-				</div>
+				<ul id="list-main">
+					<?php foreach ($directories as $dir) { ?>
+						
+						<li><a href="?currentDir=<?php echo urlencode(htmlspecialchars($dir)); ?>"><?php echo $dir; ?></a></li>
+					<?php } ?>
+				</ul>
 			<?php } else { ?>
-				<?php 
+				<?php
+					$slideString = ($numImageFiles > 1) ? 'slides' : 'slide';
+
+					echo "<h1>$currentDir <span class=\"separator\">/</span> <span class=\"count\">$numImageFiles $slideString</span></h1>"; 
+
 					foreach ($allImageFiles as $image) { 
 						$imagePath = $currentDir . DIRECTORY_SEPARATOR . $image; 
 				?>
