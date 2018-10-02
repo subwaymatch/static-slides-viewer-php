@@ -1,7 +1,6 @@
 <?php
 	function longest_common_substring($words)
 	{
-		// $words = array_map('strtolower', array_map('trim', $words));
 		$sort_by_strlen = create_function('$a, $b', 'if (strlen($a) == strlen($b)) { return strcmp($a, $b); } return (strlen($a) < strlen($b)) ? -1 : 1;');
 		usort($words, $sort_by_strlen);
 
@@ -79,7 +78,10 @@
 <!doctype html>
 <html>
 	<head>
-		<title>Slide Viewer</title>
+		<?php 
+			$docTitle = $isRoot ? 'Slide Viewer' : $currentDir; 
+		?>
+		<title><?php echo $docTitle; ?></title>
 
 		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
 
