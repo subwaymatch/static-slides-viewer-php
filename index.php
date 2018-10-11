@@ -83,6 +83,8 @@
 		?>
 		<title><?php echo $docTitle; ?></title>
 
+		<meta charset="utf-8">
+
 		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
 
 		<style>
